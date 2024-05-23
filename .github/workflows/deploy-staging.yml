@@ -34,6 +34,8 @@ jobs:
         eval $(ssh-agent -s)
         # Add the SSH private key to the SSH agent
         echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+        # Ensure the .ssh directory exists
+        mkdir -p ~/.ssh
         # Add the SSH host to known hosts
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Synchronize the local repository with the deployment path on the staging server
