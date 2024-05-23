@@ -38,6 +38,8 @@ jobs:
         mkdir -p ~/.ssh
         # Add the SSH host to known hosts
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+        # Print the SSH_HOST to verify it's set correctly
+        echo "SSH Host: $SSH_HOST"
         # Synchronize the local repository with the deployment path on the staging server
         rsync -avz --delete-after . $SSH_USER@$SSH_HOST:$DEPLOY_PATH
         # Connect to the staging server and execute the deployment commands as the node user
