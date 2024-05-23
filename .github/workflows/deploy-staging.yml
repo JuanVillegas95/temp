@@ -1,0 +1,49 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+    - name: Deploy to Staging
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      run: |
+        # Add the SSH private key to the SSH agent
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+        # Add the SSH host to known hosts
+        ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+        # Synchronize the local repository with the deployment path on the staging server
+        rsync -avz --delete-after . $SSH_USER@$SSH_HOST:$DEPLOY_PATH
+        # Connect to the staging server and execute the deployment commands as the node user
+        ssh $SSH_USER@$SSH_HOST << 'EOF'
+          sudo su - node
+          cd $DEPLOY_PATH
+          npm install
+          cd ..
+          pm2 restart ecosystem.config.js
+        EOF
