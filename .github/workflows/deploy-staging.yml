@@ -41,11 +41,11 @@ jobs:
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
         # Ensure the deployment path has the correct permissions
-        ssh $SSH_USER@$SSH_HOST "sudo mkdir -p $DEPLOY_PATH && sudo chown -R $SSH_USER:$SSH_USER $DEPLOY_PATH"
+        ssh $SSH_USER@$SSH_HOST "sudo mkdir -p $DEPLOY_PATH && sudo chown -R node:node $DEPLOY_PATH && sudo chmod -R 775 $DEPLOY_PATH"
         # Check the permissions and ownership of the deployment path
         ssh $SSH_USER@$SSH_HOST "ls -ld $DEPLOY_PATH"
         # Synchronize the local repository with the deployment path on the staging server
-        rsync -avz --delete-after -e "ssh -o StrictHostKeyChecking=no" . $SSH_USER@$SSH_HOST:/home/node/app
+        rsync -avz --delete-after . $SSH_USER@$SSH_HOST:$DEPLOY_PATH
         # Connect to the staging server and execute the deployment commands as the node user
         ssh $SSH_USER@$SSH_HOST << 'EOF'
           sudo su - node
