@@ -40,6 +40,8 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
+        # Ensure the deployment path has the correct permissions
+        ssh $SSH_USER@$SSH_HOST "sudo mkdir -p $DEPLOY_PATH && sudo chown -R $SSH_USER:$SSH_USER $DEPLOY_PATH"
         # Synchronize the local repository with the deployment path on the staging server
         rsync -avz --delete-after . $SSH_USER@$SSH_HOST:$DEPLOY_PATH
         # Connect to the staging server and execute the deployment commands as the node user
