@@ -1,0 +1,41 @@
+name: Test SSH Connection
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/*
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        # Start the SSH agent
+        eval $(ssh-agent -s)
+        # Add the SSH private key to the SSH agent
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+        # Ensure the .ssh directory exists
+        mkdir -p ~/.ssh
+        # Add the SSH host to known hosts
+        ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+        # Print the SSH_HOST to verify it's set correctly
+        echo "SSH Host: $SSH_HOST"
+        # Connect to the server, switch to the node user and create the directory
+        ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
+          sudo su - node -c "mkdir -p ~/hello_world && echo 'hello world' > ~/hello_world/message.txt"
+        EOF
+        # Verify the directory and file were created
+        ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
+          sudo su - node -c "ls -la ~/hello_world && cat ~/hello_world/message.txt"
+        EOF
