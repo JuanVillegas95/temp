@@ -1,4 +1,4 @@
-name: Test SSH Connection
+name: Deploy Application
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - feature/*
 
 jobs:
-  test-ssh:
+  deploy-app:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,11 +31,25 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
-        # Connect to the server, switch to the node user and create the directory
+
+    - name: Deploy Application
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      run: |
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
-          sudo su - node -c "mkdir -p ~/hello_world && echo 'hello world' > ~/hello_world/message.txt"
+          sudo su - node -c "
+            # Create deployment directory if it doesn't exist
+            mkdir -p $DEPLOY_PATH
+            # Change to deployment directory
+            cd $DEPLOY_PATH
+            # Pull latest changes from the repository
+            git pull origin main
+            # Install dependencies
+            npm install
+            cd ..
+            pm2 restart ecosystem.config.js
+          "
         EOF
-        # Verify the directory and file were created
-        ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
-          sudo su - node -c "ls -la ~/hello_world && cat ~/hello_world/message.txt"
-        EOF
+
