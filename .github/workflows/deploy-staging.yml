@@ -33,8 +33,5 @@ jobs:
         echo "SSH Host: $SSH_HOST"
         # Connect to the server, switch to the node user and create the directory
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
-          sudo su - node -c "
-            cd /path/to/directory && 
-            mkdir -p ~/hello_world && 
-            echo 'hello world' > ~/hello_world/message.txt"
+          sudo su - node -c "mkdir -p ~/hello_world"
         EOF
