@@ -37,5 +37,6 @@ jobs:
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
           sudo su - node -c "
             cd ./app && 
-            mkdir hi hello_world && 
+            mkdir -p hello_world && 
+            echo 'hello world' > hello_world/message.txt"
         EOF
