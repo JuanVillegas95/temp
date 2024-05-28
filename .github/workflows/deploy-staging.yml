@@ -20,7 +20,6 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_USER: ${{ secrets.SSH_USER }}
-        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       run: |
         # Start the SSH agent
         eval $(ssh-agent -s)
@@ -34,12 +33,10 @@ jobs:
         echo "SSH Host: $SSH_HOST"
         # Connect to the server, switch to the node user and create the directory
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
-          sudo su - node -c "
-            cd ./app && 
-            git stash &&
-            git pull origin main &&
-            git stash pop &&
-            cd ..
-            pm2 restart ecosystem.config.js
-          "
+        sudo su - node -c "
+        cd ./app && 
+        git pull
+        cd ..
+        pm2 restart ecosystem.config.js
+        "
         EOF
