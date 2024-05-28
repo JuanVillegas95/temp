@@ -41,15 +41,6 @@ jobs:
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
           sudo su - node -c "
             # Create deployment directory if it doesn't exist
-            mkdir -p $DEPLOY_PATH
-            # Change to deployment directory
-            cd $DEPLOY_PATH
-            # Pull latest changes from the repository
-            git pull origin main
-            # Install dependencies
-            npm install
-            cd ..
-            pm2 restart ecosystem.config.js
-          "
+            mkdir -p hiii
         EOF
 
