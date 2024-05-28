@@ -31,7 +31,11 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
-        # Create a directory called 'hello_world'
-        ssh -vvv $SSH_USER@$SSH_HOST "mkdir -p hello_world && echo 'hello world' > hello_world/message.txt"
+        # Connect to the server, switch to the node user and create the directory
+        ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
+          sudo su - node -c "mkdir -p ~/hello_world && echo 'hello world' > ~/hello_world/message.txt"
+        EOF
         # Verify the directory and file were created
-        ssh -vvv $SSH_USER@$SSH_HOST "ls -la hello_world && cat hello_world/message.txt"
+        ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
+          sudo su - node -c "ls -la ~/hello_world && cat ~/hello_world/message.txt"
+        EOF
