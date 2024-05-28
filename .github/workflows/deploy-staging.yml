@@ -35,8 +35,7 @@ jobs:
         # Connect to the server, switch to the node user and create the directory
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
           sudo su - node -c "
-            cd $DEPLOY_PATH && 
-            mkdir -p hello_world && 
+            cd ./app && 
             git stash &&
             git pull origin main &&
             git stash pop &&
