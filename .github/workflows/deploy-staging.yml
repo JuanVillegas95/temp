@@ -1,4 +1,4 @@
-name: Deploy to Staging
+name: Test SSH Connection
 
 on:
   push:
@@ -8,27 +8,18 @@ on:
       - feature/*
 
 jobs:
-  build:
+  test-ssh:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Deploy to Staging
+    - name: Set up SSH
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_USER: ${{ secrets.SSH_USER }}
-        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       run: |
         # Start the SSH agent
         eval $(ssh-agent -s)
@@ -40,16 +31,5 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
-        # Ensure the deployment path has the correct permissions
-        ssh -vvv $SSH_USER@$SSH_HOST "sudo mkdir -p $DEPLOY_PATH && sudo chown -R node:node $DEPLOY_PATH && sudo chmod -R 775 $DEPLOY_PATH"
-        # Check the permissions and ownership of the deployment path
-        ssh -vvv $SSH_USER@$SSH_HOST "ls -ld $DEPLOY_PATH"
-        # Synchronize the local repository with the deployment path on the staging server
-        rsync -avz --delete-after . $SSH_USER@$SSH_HOST:$DEPLOY_PATH
-        # Connect to the staging server and execute the deployment commands as the node user
-        ssh -T $SSH_USER@$SSH_HOST << 'EOF'
-          sudo su - node
-          cd $DEPLOY_PATH
-          npm install
-          pm2 restart ecosystem.config.js
-        EOF
+        # List the contents of the home directory on the remote server
+        ssh -vvv $SSH_USER@$SSH_HOST "ls -la"
