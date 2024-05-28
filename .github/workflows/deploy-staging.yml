@@ -1,4 +1,4 @@
-name: Deploy Application
+name: Test SSH Connection
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - feature/*
 
 jobs:
-  deploy-app:
+  test-ssh:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,16 +31,5 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
-
-    - name: Deploy Application
-      env:
-        SSH_HOST: ${{ secrets.SSH_HOST }}
-        SSH_USER: ${{ secrets.SSH_USER }}
-        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-      run: |
-        ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
-          sudo su - node -c "
-            # Create deployment directory if it doesn't exist
-            mkdir -p hiii
-        EOF
-
+        # List the contents of the home directory on the remote server
+        ssh -vvv $SSH_USER@$SSH_HOST "ls -la"
