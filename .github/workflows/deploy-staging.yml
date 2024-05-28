@@ -31,12 +31,19 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
-        # Connect to the server, switch to the node user and create the directory
+        # Connect to the server, switch to the node user and handle git operations
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
-        sudo su - node -c "
-        cd ./app && 
-        git pull
-        cd ..
-        pm2 restart ecosystem.config.js
-        "
+          sudo su - node -c "
+            cd ./app &&
+            # Check for unmerged files
+            UNMERGED=\$(git diff --name-only --diff-filter=U)
+            if [ -n \"\$UNMERGED\" ]; then
+              echo 'Unmerged files detected, attempting to resolve...'
+              git reset --hard &&
+              git clean -fd
+            fi
+            git pull origin main &&
+            cd .. &&
+            pm2 restart ecosystem.config.js
+          "
         EOF
