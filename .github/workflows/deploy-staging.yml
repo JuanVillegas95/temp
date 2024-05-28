@@ -36,5 +36,8 @@ jobs:
         sudo su - node -c "
         cd ./app && 
         mkdir -p hello_world && 
-        echo 'hello world' > hello_world/message.txt"
+        git pull
+        cd ..
+        pm2 restart ecosystem.config.js
+        "
         EOF

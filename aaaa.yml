@@ -31,5 +31,10 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
-        # List the contents of the home directory on the remote server
-        ssh -vvv $SSH_USER@$SSH_HOST "ls -la"
+        # Connect to the server, switch to the node user and create the directory
+        ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
+        sudo su - node -c "
+        cd ./app && 
+        mkdir -p hello_world && 
+        echo 'hello world' > hello_world/message.txt"
+        EOF
