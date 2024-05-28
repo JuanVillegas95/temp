@@ -1,4 +1,4 @@
-name: Deploy Application
+Connection
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - feature/*
 
 jobs:
-  deploy-app:
+  test-ssh:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +20,8 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_USER: ${{ secrets.SSH_USER }}
+        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
       run: |
         # Start the SSH agent
         eval $(ssh-agent -s)
@@ -31,16 +33,9 @@ jobs:
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
         # Print the SSH_HOST to verify it's set correctly
         echo "SSH Host: $SSH_HOST"
-
-    - name: Deploy Application
-      env:
-        SSH_HOST: ${{ secrets.SSH_HOST }}
-        SSH_USER: ${{ secrets.SSH_USER }}
-        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-      run: |
+        # Connect to the server, switch to the node user and create the directory
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
           sudo su - node -c "
-            # Create deployment directory if it doesn't exist
-            mkdir -p hiii
+            cd ./app && 
+            mkdir hi hello_world && 
         EOF
-
