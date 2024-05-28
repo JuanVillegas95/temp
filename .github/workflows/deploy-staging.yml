@@ -37,8 +37,6 @@ jobs:
         ssh -vvv $SSH_USER@$SSH_HOST << 'EOF'
           sudo su - node -c "
             cd ./app && 
-            git pull &&
-            cd .. &&
-            pm2 restart ecosystem.config.js
+            mkdir hi
         EOF
 
